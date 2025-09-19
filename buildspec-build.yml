@@ -7,9 +7,6 @@ env:
 phases:
   pre_build:
     commands:
-      - echo "Region: ${AWS_REGION}"
-      - echo "ECR: ${ECR_REPO_URI}"
-      - echo "Logging into ECR..."
       - aws ecr get-login-password --region "${AWS_REGION}" | docker login --username AWS --password-stdin "${ECR_REPO_URI%/*}"
       - IMAGE_TAG_SHORT="$(echo "${CODEBUILD_RESOLVED_SOURCE_VERSION:-manual}" | cut -c1-7)"
       - echo "Computed tag: ${IMAGE_TAG_SHORT}"

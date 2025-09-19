@@ -5,3 +5,19 @@ phases:
     commands:
       - echo "hello"
       - aws ecr get-login-password --region "us-east-1" | docker login --username AWS --password-stdin "${ECR_REPO_URI%/*}"
+      - IMAGE_TAG_SHORT="$(echo "${CODEBUILD_RESOLVED_SOURCE_VERSION:-manual}" | cut -c1-7)"
+  build:
+    commands:
+      - echo "Build started on `date`"
+      - echo "Building the Docker image..."
+      - docker build -t "${ECR_REPO_URI}:latest" -t "${ECR_REPO_URI}:${IMAGE_TAG_SHORT}" .
+  post_build:
+    commands:
+      - echo "Build completed on `date`"
+      - echo "Pushing the Docker image..."
+      - docker push "${ECR_REPO_URI}:latest"
+      - docker push "${ECR_REPO_URI}:${IMAGE_TAG_SHORT}"
+
+artifacts:
+  files:
+    - "**/*"

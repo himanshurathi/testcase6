@@ -3,18 +3,4 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo "Computed tag: ${IMAGE_TAG_SHORT}"
-  build:
-    commands:
-      - echo "Building Docker image..."
-      # - docker build -t "${ECR_REPO_URI}:latest" .
-      # - docker tag "${ECR_REPO_URI}:latest" "${ECR_REPO_URI}:${IMAGE_TAG_SHORT}"
-  post_build:
-    commands:
-      - echo "Pushing images to ECR..."
-      # - docker push "${ECR_REPO_URI}:latest"
-      # - docker push "${ECR_REPO_URI}:${IMAGE_TAG_SHORT}"
-
-artifacts:
-  files:
-    - "**/*"
+      - echo "hello"

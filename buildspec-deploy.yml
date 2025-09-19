@@ -15,8 +15,9 @@ phases:
   build:
     commands:
       - echo "Deploying to EKS cluster"
-      - kubectl set image deployment/webapp "${EKS_CONTAINER_NAME}"="${ECR_REPO_URI}:${IMAGE_TAG_SHORT}" --record
+      - kubectl apply -n default -f k8s/deployment.yaml
       - kubectl rollout status deployment/webapp
+      - kubectl set image -n default deployment/webapp app="${ECR_REPO_URI}:latest" --recordable=true
   post_build:
     commands:
       - echo "Deployment completed"

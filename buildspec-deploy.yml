@@ -11,12 +11,12 @@ phases:
     commands:
       - echo "Starting deploy phase"
       - echo "Configuring kubectl"
-      - aws eks update-kubeconfig --region us-east-1 --name "${EKS_CLUSTER_NAME}"
+      - aws eks update-kubeconfig --region us-east-1 --name eks2
   build:
     commands:
       - echo "Deploying to EKS cluster"
-      - kubectl set image deployment/"${EKS_DEPLOYMENT_NAME}" "${EKS_CONTAINER_NAME}"="${ECR_REPO_URI}:${IMAGE_TAG_SHORT}" --record
-      - kubectl rollout status deployment/"${EKS_DEPLOYMENT_NAME}"
+      - kubectl set image deployment/webapp "${EKS_CONTAINER_NAME}"="${ECR_REPO_URI}:${IMAGE_TAG_SHORT}" --record
+      - kubectl rollout status deployment/webapp
   post_build:
     commands:
       - echo "Deployment completed"

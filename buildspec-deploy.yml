@@ -1,0 +1,29 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Installing kubectl"
+      - curl -sLO "https://amazon-eks.s3.us-west-2.amazonaws.com/1.30.0/2024-07-11/bin/linux/amd64/kubectl"
+      - chmod +x kubectl && mv kubectl /usr/local/bin/kubectl
+  pre_build:
+    commands:
+      - set -euo pipefail
+      - echo "Configuring kubeconfig for cluster: ${EKS_CLUSTER_NAME} in ${AWS_REGION}"
+      - aws eks update-kubeconfig --region "${AWS_REGION}" --name "${EKS_CLUSTER_NAME}"
+      - kubectl version --client
+      - echo "Using namespace: default"
+  build:
+    commands:
+      - echo "Applying Kubernetes manifests"
+      - kubectl apply -n default -f k8s/deployment.yaml
+      - echo "Setting image to ECR latest"
+      - kubectl set image -n default deployment/${DEPLOYMENT_NAME} app="${ECR_REPO_URI}:latest" --record || true
+  post_build:
+    commands:
+      - echo "Waiting for rollout..."
+      - kubectl rollout status -n default deployment/${DEPLOYMENT_NAME} --timeout=180s
+
+artifacts:
+  files:
+    - "**/*"

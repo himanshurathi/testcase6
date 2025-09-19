@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: REPLACED-BY-PIPELINE
+          image: 619512840514.dkr.ecr.us-east-1.amazonaws.com/case6-ecr:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80

@@ -16,6 +16,7 @@ phases:
     commands:
       - echo "Deploying to EKS cluster"
       - kubectl apply -f https://raw.githubusercontent.com/himanshurathi/testcase6/refs/heads/main/k8s/deployment.yaml
+      - kubectl set image deployment/webapp app=619512840514.dkr.ecr.us-east-1.amazonaws.com/case6-ecr:latest
   post_build:
     commands:
       - echo "Deployment completed"

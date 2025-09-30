@@ -17,13 +17,13 @@ locals {
   name                  = "case6-cicd"
   ecr_name              = "case6-ecr"
   branch_name           = "main"              # <- use main
-  eks_cluster           = "eks2"
+  eks_cluster           = "demo-eks-cluster"
   k8s_namespace         = "default"
   deployment_name       = "webapp"
 
   # --- CHANGE ME ---
-  github_repo_fullname  = "himanshurathi/testcase6"   # e.g., talktotechie/case6-demo
-  github_connection_arn = "arn:aws:codeconnections:us-east-1:619512840514:connection/97720b2f-5913-4ba7-b22f-edb3c439818d"
+  github_repo_fullname  = "awsterraworkshop/case6-buildfiles"   # e.g., talktotechie/case6-demo
+  github_connection_arn = "arn:aws:codeconnections:us-east-1:777669575376:connection/e4f2c3ec-7fc6-48f3-b622-3973907b18ed"
 }
 
 ########################
@@ -93,49 +93,7 @@ resource "aws_iam_role_policy_attachment" "codebuild_admin" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
-    # resource "aws_iam_role_policy" "codebuild_inline" {
-    #   name = "${local.name}-codebuild-policy"
-    #   role = aws_iam_role.codebuild.id
-    #   policy = jsonencode({
-    #     Version = "2012-10-17",
-    #     Statement = [
-    #       # CloudWatch Logs
-    #       {
-    #         Effect: "Allow",
-    #         Action: ["logs:CreateLogGroup","logs:CreateLogStream","logs:PutLogEvents","logs:DescribeLogStreams"],
-    #         Resource: [
-    #           aws_cloudwatch_log_group.cb_build.arn,
-    #           "${aws_cloudwatch_log_group.cb_build.arn}:*",
-    #           aws_cloudwatch_log_group.cb_deploy.arn,
-    #           "${aws_cloudwatch_log_group.cb_deploy.arn}:*"
-    #         ]
-    #       },
-    #       # S3 artifacts (read/write by CodeBuild during pipeline)
-    #       {
-    #         Effect: "Allow",
-    #         Action: ["s3:PutObject","s3:GetObject","s3:GetObjectVersion","s3:GetBucketAcl","s3:GetBucketLocation","s3:ListBucket"],
-    #         Resource: [aws_s3_bucket.artifacts.arn, "${aws_s3_bucket.artifacts.arn}/*"]
-    #       },
-    #       # ECR push/pull + auth
-    #       {
-    #         Effect: "Allow",
-    #         Action: [
-    #           "ecr:GetAuthorizationToken","ecr:BatchGetImage","ecr:GetDownloadUrlForLayer",
-    #           "ecr:DescribeRepositories","ecr:InitiateLayerUpload","ecr:UploadLayerPart",
-    #           "ecr:CompleteLayerUpload","ecr:PutImage","ecr:BatchCheckLayerAvailability"
-    #         ],
-    #         Resource: "*"
-    #       },
-    #       # EKS describe (for update-kubeconfig)
-    #       {
-    #         Effect: "Allow",
-    #         Action: ["eks:DescribeCluster"],
-    #         Resource: "arn:aws:eks:us-east-1:${data.aws_caller_identity.current.account_id}:cluster/${local.eks_cluster}"
-    #       }
-    #     ]
-    #   })
-    # }
-
+    
 ########################
 # IAM for CodePipeline
 ########################
@@ -303,13 +261,13 @@ resource "aws_codepipeline" "pipeline" {
 }
 
 resource "aws_eks_access_entry" "cb" {
-  cluster_name  = "eks2"
-  principal_arn = "arn:aws:iam::619512840514:role/case6-cicd-codebuild-role"
+  cluster_name  = local.eks_cluster
+  principal_arn = aws_iam_role.codebuild.arn
   type          = "STANDARD"
 }
 
 resource "aws_eks_access_policy_association" "cb_admin" {
-  cluster_name  = "eks2"
+  cluster_name  = local.eks_cluster
   principal_arn = aws_eks_access_entry.cb.principal_arn
   policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
   access_scope {
